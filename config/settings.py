@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework",
     # first party apps
     "users",
+    "quizes",
 ]
 
 MIDDLEWARE = [
