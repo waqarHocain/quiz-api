@@ -13,3 +13,18 @@ class Quiz(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Question(models.Model):
+    title = models.CharField(max_length=400)
+    quiz = models.ForeignKey(to=Quiz, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["title", "quiz"], name="unique_question_title"
+            )
+        ]
+
+    def __str__(self):
+        return self.title
