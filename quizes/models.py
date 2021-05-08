@@ -28,3 +28,19 @@ class Question(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Answer(models.Model):
+    title = models.CharField(max_length=400)
+    question = models.ForeignKey(to=Question, on_delete=models.CASCADE)
+    correct = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["title", "question"], name="unique_answer_title"
+            )
+        ]
+
+    def __str__(self):
+        return self.title
