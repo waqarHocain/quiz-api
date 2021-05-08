@@ -1,0 +1,2 @@
+" run tests using pytest, instead of default django test runner
+let test#python#runner = 'pytest'
