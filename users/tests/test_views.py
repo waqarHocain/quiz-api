@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 import pytest
 
+from rest_framework.authtoken.models import Token
+
 from users.views import Register
 
 User = get_user_model()
@@ -47,3 +49,35 @@ class TestRegiseterView:
         assert response.status_code == 400
         assert response2.status_code == 400
         assert User.objects.count() == 0
+
+
+@pytest.mark.django_db
+class TestLoginView:
+    def setup_class(self):
+        self.url = reverse("auth:login")
+
+    def test_POST_request_with_valid_email_password_returns_back_token_and_email(
+        self, client
+    ):
+        data = {"email": "a@b.com", "password": "sekrit123"}
+        user = User.objects.create_user(**data)
+        token = Token.objects.get(user=user)
+
+        response = client.post(
+            self.url, {"username": data["email"], "password": data["password"]}
+        )
+
+        assert response.status_code == 200
+        assert response.data["token"] == token.key
+        assert response.data["email"] == user.email
+
+    def test_POSTing_invalid_data_returns_back_no_token(self, client):
+        data = {"email": "a@b.com", "password": "sekrit123"}
+        user = User.objects.create_user(**data)
+
+        response = client.post(
+            self.url, {"username": data["email"], "password": "wrongpassword420"}
+        )
+
+        assert response.status_code == 400
+        assert "token" not in response.data
