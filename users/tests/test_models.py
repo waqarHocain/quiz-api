@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 import pytest
 
+from rest_framework.authtoken.models import Token
+
 User = get_user_model()
 
 
@@ -14,6 +16,10 @@ class TestUserManager:
     def test_create_user_raise_error_if_email_not_provided(self):
         with pytest.raises(ValueError):
             User.objects.create_user(email="", password="asjeiwo2")
+
+    def test_a_token_is_created_when_creating_a_new_user(self):
+        user = User.objects.create_user(email="a@b.com", password="sekrti12#2")
+        token = Token.objects.get(user=user)
 
     def test_password_is_set_properly(self):
         password = "sekrti12#2"
