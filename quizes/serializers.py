@@ -5,6 +5,10 @@ from . import models
 
 
 class Quiz(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(
+        read_only=True, default=serializers.CurrentUserDefault()
+    )
+
     class Meta:
         model = models.Quiz
         fields = ["id", "title", "user"]
@@ -13,6 +17,10 @@ class Quiz(serializers.ModelSerializer):
                 queryset=models.Quiz.objects.all(), fields=["title", "user"]
             )
         ]
+
+    def save(self, **kwargs):
+        kwargs["user"] = self.fields["user"].get_default()
+        return super().save(**kwargs)
 
 
 class Question(serializers.ModelSerializer):
