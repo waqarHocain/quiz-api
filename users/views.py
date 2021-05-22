@@ -2,6 +2,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.permissions import AllowAny
 
 from . import serializers
 from . import models
@@ -10,12 +11,15 @@ from . import models
 class Register(generics.CreateAPIView):
     """Creates a new user object provided valid email and password"""
 
+    permission_classes = [AllowAny]
     serializer_class = serializers.UserSerializer
     queryset = models.User.objects.all()
 
 
 class Login(ObtainAuthToken):
     """Given email/password of an existing user, returns back auth token and email"""
+
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(
