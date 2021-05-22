@@ -10,3 +10,9 @@ class QuizListCreate(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class QuizDetail(generics.RetrieveAPIView):
+
+    queryset = Quiz.objects.all()
+    serializer_class = serializers.Quiz
