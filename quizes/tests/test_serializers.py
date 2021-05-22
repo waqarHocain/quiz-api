@@ -41,6 +41,18 @@ class TestQuizSerializer:
         )
         assert quiz_serializer.is_valid() == False
 
+    def test_also_retrieves_all_associated_questions(self):
+        quiz_serializer = serializers.Quiz(
+            data={"title": "test title 0x01"}, context={"request": self.request_factory}
+        )
+        quiz_serializer.is_valid()
+        quiz = quiz_serializer.save()
+        models.Question.objects.create(title="question 1", quiz=quiz)
+        models.Question.objects.create(title="question 2", quiz=quiz)
+
+        assert len(quiz_serializer.data["questions"]) == 2
+        assert quiz_serializer.data["questions"][0]["title"] == "question 1"
+
 
 @pytest.mark.django_db
 class TestQuestionSerializer:
