@@ -1,13 +1,13 @@
-import os
+from decouple import config
 
 from .base import *
 
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = config("SECRET_KEY")
 
 DEBUG = False
 
-ALLOWED_HOSTS = [os.environ.get("HOST_URL")]
+ALLOWED_HOSTS = [config("HOST_URL")]
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
