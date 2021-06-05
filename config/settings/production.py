@@ -19,6 +19,6 @@ DATABASES = {
 }
 
 # CORS
-CORS_ALLOWED_ORIGINS = [
-    config("FRONTEND_URL"),
-]
+CORS_ALLOWED_ORIGINS = config(
+    "FRONTEND_URLS", cast=lambda urls: [url.strip() for url in urls.split(",")]
+)
