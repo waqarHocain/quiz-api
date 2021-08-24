@@ -88,3 +88,45 @@ class TestQuizDetail:
 
         assert response.status_code == 404
         assert "Not found" in response.data["detail"]
+
+
+@pytest.mark.django_db
+class TestQuestions:
+    def setup_method(self):
+        self.user = User.objects.create_user(email="a@b.com", password="aasdfew23")
+        self.token = Token.objects.get(user=self.user)
+        self.auth_header_str = f"Token {self.token.key}"
+        self.quiz = Quiz.objects.create(title="test", user=self.user)
+        self.url = reverse("quizes:questions", args=[self.quiz.id])
+
+    def test_can_only_be_accessed_by_authorized_user(self, client):
+        """Can only be accessed with a valid auth token"""
+        response = client.get(self.url)
+        assert response.status_code == 401
+
+        # can be accessed with a valid token
+        response2 = client.get(self.url, HTTP_AUTHORIZATION=self.auth_header_str)
+        assert response2.status_code == 200
+
+    def test_get_request_returns_all_created_questions_that_belong_to_specified_quiz_only(
+        self, client
+    ):
+        quiz2 = Quiz.objects.create(title="quiz2", user=self.user)
+        Question.objects.create(title="Shouldn't return", quiz=quiz2)
+
+        Question.objects.create(title="Question 1", quiz=self.quiz)
+        Question.objects.create(title="Question 2", quiz=self.quiz)
+
+        response = client.get(self.url, HTTP_AUTHORIZATION=self.auth_header_str)
+
+        assert response.status_code == 200
+        assert len(response.data) == 2
+
+    def test_post_request_creates_new_question_in_correct_quiz(self, client):
+        response = client.post(
+            self.url,
+            HTTP_AUTHORIZATION=self.auth_header_str,
+            data={"title": "Question 1"},
+        )
+
+        assert response.status_code == 201
