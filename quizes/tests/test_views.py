@@ -29,9 +29,12 @@ class TestQuizListCreate:
         response2 = client.get(self.url, HTTP_AUTHORIZATION=self.auth_header_str)
         assert response2.status_code == 200
 
-    def test_GET_request_returns_all_saved_quizes(self, client):
+    def test_GET_request_returns_all_quizzes_for_logged_in_user(self, client):
         Quiz.objects.create(title="quiz1", user=self.user)
         Quiz.objects.create(title="quiz2", user=self.user)
+
+        user2 = User.objects.create_user(email="foo@bar.com", password="sekoret321")
+        Quiz.objects.create(title="quiz3", user=user2)
 
         response = client.get(self.url, HTTP_AUTHORIZATION=self.auth_header_str)
 
