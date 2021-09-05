@@ -5,7 +5,7 @@ import pytest
 from rest_framework.authtoken.models import Token
 
 from quizes.views import QuizListCreate
-from quizes.models import Quiz, Question
+from quizes.models import Quiz, Question, Answer
 
 User = get_user_model()
 
@@ -133,3 +133,38 @@ class TestQuestions:
         )
 
         assert response.status_code == 201
+
+
+@pytest.mark.django_db
+class TestAnswerListCreate:
+    def setup_method(self):
+        self.user = User.objects.create_user(email="a@b.com", password="aasdfew23")
+        self.quiz = Quiz.objects.create(title="quiz 1", user=self.user)
+        self.question = Question.objects.create(title="question 1", quiz=self.quiz)
+        self.token = Token.objects.get(user=self.user)
+        self.auth_header_str = f"Token {self.token.key}"
+        self.url = reverse(
+            "quizes:answers",
+            args=[self.quiz.id, self.question.id],
+        )
+
+    def test_GET_retrieves_all_answers_of_specified_questoin(self, client):
+        Answer.objects.create(title="answer 1", question=self.question)
+        Answer.objects.create(title="answer 2", correct=True, question=self.question)
+
+        response = client.get(self.url, HTTP_AUTHORIZATION=self.auth_header_str)
+
+        assert response.status_code == 200
+        assert len(response.data) == 2
+        assert response.data[1].get("title") == "answer 2"
+
+    def test_POST_request_creates_a_new_answer(self, client):
+        response = client.post(
+            self.url,
+            HTTP_AUTHORIZATION=self.auth_header_str,
+            data={"title": "new answer"},
+        )
+
+        assert response.status_code == 201
+        assert response.data.get("title") == "new answer"
+        assert response.data.get("question") == self.question.id

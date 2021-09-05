@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .models import Quiz, Question
+from .models import Quiz, Question, Answer
 from . import serializers
 
 
@@ -36,3 +36,22 @@ class QuestionListCreate(generics.ListCreateAPIView):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+
+
+class AnswerListCreate(generics.ListCreateAPIView):
+    serializer_class = serializers.Answer
+
+    def get_queryset(self):
+        return Answer.objects.filter(question__id=self.kwargs["question_pk"])
+
+    def create(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = serializers.Answer(
+            data={
+                "title": request.data.get("title"),
+                "question": self.kwargs["question_pk"],
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=201)
