@@ -78,6 +78,17 @@ class TestQuestionSerializer:
 
         assert question_serializer.is_valid() == False
 
+    def test_also_retrieves_all_associated_answers(self):
+        user = User.objects.create_user(email="foo@bar.com", password="jfklosoi32")
+        quiz = models.Quiz.objects.create(title="test quiz", user=user)
+        question = models.Question.objects.create(title="question", quiz=quiz)
+        models.Answer.objects.create(title="test ans", question=question)
+        models.Answer.objects.create(title="ans 2", question=question)
+
+        question_serializer = serializers.Question(question)
+
+        assert len(question_serializer.data["answers"]) == 2
+
 
 @pytest.mark.django_db
 class TestAnswerSerializer:
