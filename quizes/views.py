@@ -16,7 +16,7 @@ class QuizListCreate(generics.ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 
-class QuizDetail(generics.RetrieveAPIView):
+class QuizDetail(generics.RetrieveDestroyAPIView):
     queryset = Quiz.objects.all()
     serializer_class = serializers.Quiz
 

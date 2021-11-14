@@ -85,6 +85,11 @@ class TestQuizDetail:
         assert len(response.data["questions"]) == 2
         response.data["questions"] == "Question 1"
 
+    def test_DELETE_request_deletes_the_quiz(self, client):
+        assert Quiz.objects.count() == 1
+        client.delete(self.url, HTTP_AUTHORIZATION=self.auth_header_str)
+        assert Quiz.objects.count() == 0
+
     def test_returns_404_if_provided_pk_is_wrong(self, client):
         incorrect_url = reverse("quizes:quiz_detail", args=[2])
         response = client.get(incorrect_url, HTTP_AUTHORIZATION=self.auth_header_str)
